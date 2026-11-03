@@ -1,0 +1,6 @@
+/bin/
+/dist/
+.test-config/
+.test-login.out
+.judt.json
+.DS_Store

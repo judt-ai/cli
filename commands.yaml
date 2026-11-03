@@ -1,0 +1,446 @@
+# The judt command tree.
+#
+# The generator (internal/gen) reads this file and spec/openapi.json and writes
+# internal/cli/operations_gen.go. Every operation in the spec needs an entry under
+# `operations`; CI fails until it has one. Flags, flag help and validation come from
+# the spec, so an entry only names the command and says where it sits.
+#
+# groups:      commands that hold other commands. `long` is the text `--help` prints
+#              above the list of subcommands, so write it for someone (or an agent)
+#              who has never used Judt.
+# sections:    headings that a group's `--help` sorts its subcommands under.
+# operations:  operationId → command.
+#   command    the full command path.
+#   args       positional arguments: path parameters or body fields, in order. `id?`
+#              lets the first argument name the App instead of --app.
+#   section    the heading in the parent's --help.
+#   aliases    other names for the last word.
+#   example    lines for the Examples block.
+#   secret     body fields read from stdin or a hidden prompt, never a flag.
+#   print      a string field printed as-is in a terminal, instead of the whole result.
+#   exit       an integer field that becomes the exit code.
+#   confirm    ask before running (or require --yes outside a terminal).
+#   shortcut   also offer the command at the top level under this name.
+#   short      replaces the spec's summary in lists of commands.
+#   help       replaces the spec's description, where it explains HTTP details
+#              (headers, content types) that the CLI handles itself.
+
+root:
+  long: |
+    judt manages Judt Apps from the command line.
+
+    An App is a web app or site that Judt hosts. Each App has a sandbox, where its
+    source lives and a dev server runs, and a production deployment at a public URL.
+    The usual flow is: create an App, change its files, preview it, commit, deploy.
+
+    Sign in once with `judt auth login`, or set JUDT_API_TOKEN to an API token.
+
+    Most commands act on one App. Pick it with --app, the JUDT_APP environment
+    variable, or `judt apps use <app-id>`, which saves it in .judt.json in the current
+    directory.
+
+    In a terminal, results print as text. Piped, or with --json, they print as the
+    API's JSON, which is what scripts and agents should read.
+
+    Every command is one call to the Judt API (https://api.judt.ai/api/openapi.json);
+    each command's help names the call. `judt api` sends any other call.
+  example:
+    - judt auth login
+    - judt apps create --name "Acme hiring"
+    - judt apps files write src/index.ts --content @src/index.ts
+    - judt apps preview
+    - judt apps commit "First version"
+    - judt apps deploy
+  sections:
+    core: Commands
+    other: Other commands
+
+groups:
+  auth:
+    section: core
+    short: Sign in, sign out, and see who you are
+    long: |
+      Sign in to Judt, sign out, and check which person and organization the CLI
+      acts for.
+
+      There are three ways to sign in:
+
+        judt auth login               Opens your browser. You sign in, pick an
+                                      organization, and approve the CLI.
+        judt auth login --device      Prints a code to enter at judt.ai/device on any
+                                      device. Use it over SSH or where no browser opens.
+        judt auth login --with-token  Reads an API token from stdin. Create API tokens
+                                      in the dashboard.
+
+      JUDT_API_TOKEN, when set, is used instead of any saved sign-in. Use it in CI and
+      for agents.
+
+      A sign-in is for one organization. To use another, sign in again with
+      --profile <name>, and pass the same --profile (or set JUDT_PROFILE) to use it.
+  apps:
+    section: core
+    aliases: [app]
+    short: Create Apps, change their source, publish them, and see what they do
+    long: |
+      Work with Judt Apps: create and delete them, read and write their source, run
+      commands in their sandbox, publish them to production, set their Secrets, and
+      read their logs.
+
+      Commands below `judt apps` act on one App. Pick it with --app <app-id>, the
+      JUDT_APP environment variable, or `judt apps use <app-id>`, which saves it in
+      .judt.json in the current directory. `judt apps create` saves the new App the
+      same way.
+
+      An App's sandbox starts on its own when a command needs it, so the first
+      command after it goes idle takes longer.
+    sections:
+      manage: Manage Apps
+      source: Source
+      sandbox: Sandbox
+      production: Production
+      settings: Secrets and access
+      monitor: Monitoring
+      agent: Agent
+  apps files:
+    section: source
+    aliases: [file]
+    short: List, read, write, and delete source files
+    long: |
+      Read and change the source files in the App's sandbox. Paths are from the App's
+      root, such as src/index.ts.
+
+      A write or delete changes the sandbox only. To keep the change, commit it with
+      `judt apps commit`, and to publish it, run `judt apps deploy`.
+  apps commits:
+    section: source
+    short: List the App's commits
+    long: |
+      List the App's saved versions of its source. To save one, run
+      `judt apps commit`; to go back to one, run `judt apps restore <commit-id>`.
+  apps deployments:
+    section: production
+    aliases: [deployment]
+    short: List deployments, and get one
+    long: |
+      See the App's publishes to production: which commit each one published, its
+      status, and why it failed if it did. To publish, run `judt apps deploy`.
+  apps secrets:
+    section: settings
+    aliases: [secret]
+    short: Set the values the App reads at runtime, such as API keys
+    long: |
+      Store values, such as API keys, that the App reads as environment variables.
+      Secret names are uppercase letters, digits, and underscores.
+
+      `judt apps secrets set` reads the value from stdin, or asks for it without
+      showing it, so it never appears in your shell history. No command prints a
+      Secret's value.
+
+      Production reads new values at the next deploy.
+  apps tokens:
+    section: settings
+    aliases: [token]
+    short: Create an API token that reaches only this App
+    long: |
+      Create a short-lived API token that can reach only one App, to give to an agent
+      or an MCP client. Only an organization-wide API token can create one.
+  apps visitor-tokens:
+    section: settings
+    aliases: [visitor-token]
+    short: Create a link that opens a password-protected or private App
+    long: |
+      Create a short-lived token that opens the published App when it's password
+      protected or private.
+  apps sessions:
+    section: agent
+    aliases: [session]
+    short: Start and manage sessions with the Judt agent
+    long: |
+      The Judt agent changes an App's source for you. A session is one conversation
+      with it; each message you send starts a turn. Start a session with a message to
+      begin work right away.
+  apps turns:
+    section: agent
+    aliases: [turn]
+    short: Send the agent a message, and follow or cancel its work
+    long: |
+      A turn is one message to the Judt agent and the work it does in answer. Send a
+      message with `judt apps turns create <session-id> "message"`.
+  templates:
+    section: other
+    aliases: [template]
+    short: List the templates you can create an App from
+    long: |
+      Templates are the starting points for new Apps. Pass a template's ID to
+      `judt apps create --template-id`.
+  models:
+    section: other
+    aliases: [model]
+    short: List the models the Judt agent can run on
+    long: |
+      The models the Judt agent can use. `auto`, the default, picks one for each
+      message.
+  feedback:
+    section: other
+    short: Tell the Judt team about a bug or something that got in your way
+    long: |
+      Send feedback to the Judt team. People and agents can both send it, and the
+      team reads every message.
+
+operations:
+  # Account
+  get_me:
+    command: auth whoami
+    short: Show who you're signed in as, and in which organization
+    shortcut: whoami
+    example: [judt auth whoami, judt whoami --json]
+
+  # Apps
+  create_app:
+    command: apps create
+    section: manage
+    example:
+      - judt apps create --name "Acme hiring"
+      - judt apps create --name Blog --slug acme-blog --template-id tpl_...
+  list_apps:
+    command: apps list
+    section: manage
+    aliases: [ls]
+    example: [judt apps list, judt apps list --json]
+  get_app:
+    command: apps get
+    section: manage
+    args: ["id?"]
+    example: [judt apps get, judt apps get app_...]
+  update_app:
+    command: apps update
+    section: manage
+    args: ["id?"]
+    example: [judt apps update --name "Acme careers", judt apps update --production-visibility private]
+  delete_app:
+    command: apps delete
+    section: manage
+    args: ["id?"]
+    confirm: true
+    example: [judt apps delete app_... --yes]
+
+  # Source
+  list_files:
+    command: apps files list
+    aliases: [ls]
+    example: [judt apps files list, judt apps files list --glob "src/**/*.ts", judt apps files list --pattern TODO]
+  read_file:
+    command: apps files read
+    aliases: [cat]
+    args: [path]
+    print: content
+    help: |
+      Reads a text file in the App's sandbox. To read only some lines, pass
+      --lines, such as 10-40. With --json, the result also has `line_count`, the
+      file's number of lines. A binary file has `binary` set to `true` and no
+      `content`.
+    example: [judt apps files read src/index.ts, judt apps files read src/index.ts --lines 10-40]
+  write_file:
+    command: apps files write
+    aliases: [put]
+    args: [path]
+    help: |
+      Creates or replaces a text file in the App's sandbox, up to 1 MiB, and
+      creates any missing folders. Pass the text with --content: @path reads a
+      local file, and - reads stdin.
+
+      The change is in the sandbox only until you commit it with
+      `judt apps commit`.
+    example: [judt apps files write src/index.ts --content @src/index.ts, echo "hello" | judt apps files write README.md --content -]
+  delete_file:
+    command: apps files delete
+    aliases: [rm]
+    args: [path]
+    help: |
+      Deletes a file in the App's sandbox, and any folders that it leaves empty.
+      The change is in the sandbox only until you commit it with
+      `judt apps commit`.
+    example: [judt apps files delete src/old.ts]
+  get_git:
+    command: apps git
+    section: source
+    print: output
+    example: [judt apps git, judt apps git --mode diff]
+  create_commit:
+    command: apps commit
+    section: source
+    args: [message]
+    example: [judt apps commit "Add the pricing page"]
+  list_commits:
+    command: apps commits list
+    aliases: [ls]
+    example: [judt apps commits list]
+  restore_commit:
+    command: apps restore
+    section: source
+    args: [commit_id]
+    example: [judt apps restore cmt_...]
+
+  # Sandbox
+  run_command:
+    command: apps run
+    section: sandbox
+    args: [command]
+    print: output
+    exit: exit_code
+    help: |
+      Runs a shell command in the App's sandbox, waits until it finishes or times
+      out, and prints its output. The command doesn't get the App's Secrets, and
+      its output shows any Secret value as `[secret:NAME]`.
+
+      If the run is interrupted (503 or 504), run it again with the
+      --idempotency-key that the CLI prints: you get the first run's result
+      instead of running the command twice.
+    example: [judt apps run "npm test", judt apps run "ls -la" --timeout-seconds 30]
+  create_preview:
+    command: apps preview
+    section: sandbox
+    example: [judt apps preview]
+  stop_sandbox:
+    command: apps stop
+    section: sandbox
+    example: [judt apps stop]
+
+  # Production
+  deploy:
+    command: apps deploy
+    section: production
+    example: [judt apps deploy, judt apps deploy --commit-id cmt_...]
+  list_deployments:
+    command: apps deployments list
+    aliases: [ls]
+    example: [judt apps deployments list]
+  get_deployment:
+    command: apps deployments get
+    args: [deployment_id]
+    example: [judt apps deployments get dep_...]
+  unpublish_app:
+    command: apps unpublish
+    section: production
+    confirm: true
+    example: [judt apps unpublish --yes]
+
+  # Secrets and access
+  list_secrets:
+    command: apps secrets list
+    aliases: [ls]
+    example: [judt apps secrets list]
+  get_secret:
+    command: apps secrets get
+    args: [name]
+    example: [judt apps secrets get STRIPE_SECRET_KEY]
+  set_secret:
+    command: apps secrets set
+    args: [name]
+    secret: [value]
+    example: [judt apps secrets set STRIPE_SECRET_KEY, pbpaste | judt apps secrets set STRIPE_SECRET_KEY]
+  delete_secret:
+    command: apps secrets delete
+    aliases: [rm]
+    args: [name]
+    example: [judt apps secrets delete STRIPE_SECRET_KEY]
+  create_app_token:
+    command: apps tokens create
+    help: |
+      Creates an API token that reaches only one App, for up to 24 hours: the
+      current App, or the one --app-id names. Give it to an agent or an MCP client
+      that should work on that App and nothing else. The token can't reach other
+      Apps, create Apps, or create tokens, and it never outlives the token that
+      created it.
+
+      Only an organization-wide API token can create one, so sign in with
+      --with-token or set JUDT_API_TOKEN first. The answer is the only place the
+      token's value appears: store it before you continue. If the answer is lost,
+      run the command again with the --idempotency-key the CLI printed; you get the
+      same token with a new value, and the old value stops working.
+    example: [judt apps tokens create --name "Deploy bot" --expires-in 3600]
+  create_visitor_token:
+    command: apps visitor-tokens create
+    help: |
+      Creates a visitor token, which opens the published App for five minutes
+      without its password or sign-in. Add it to a link as the `access_token` URL
+      parameter, or send it in the `X-Judt-Access-Token` header. A public App
+      ignores it.
+
+      If the App isn't published, it fails with `app_unpublished`.
+    example: [judt apps visitor-tokens create]
+
+  # Monitoring
+  list_logs:
+    command: apps logs
+    section: monitor
+    example: [judt apps logs, judt apps logs --level error --source app,request, judt apps logs --environment production --since 2026-11-03T00:00:00Z]
+  list_events:
+    command: apps events
+    section: monitor
+    example: [judt apps events, judt apps events --kind error,blocked]
+
+  # Agent
+  create_session:
+    command: apps sessions create
+    example: [judt apps sessions create --message "Add a contact form"]
+  list_sessions:
+    command: apps sessions list
+    aliases: [ls]
+    example: [judt apps sessions list]
+  get_session:
+    command: apps sessions get
+    args: [session_id]
+    example: [judt apps sessions get ses_...]
+  update_session:
+    command: apps sessions update
+    args: [session_id]
+    example: [judt apps sessions update ses_... --title "Contact form"]
+  delete_session:
+    command: apps sessions delete
+    aliases: [rm]
+    args: [session_id]
+    example: [judt apps sessions delete ses_...]
+  list_session_events:
+    command: apps sessions events
+    help: |
+      Lists the session's events in order: the messages, tool calls, and status
+      changes of each turn. To get only what happened since you last looked, pass
+      --cursor with a page's `next_cursor`, or with the session's `last_sequence`.
+    args: [session_id]
+    example: [judt apps sessions events ses_...]
+  create_turn:
+    command: apps turns create
+    args: [session_id, message]
+    example: [judt apps turns create ses_... "Make the header sticky"]
+  list_turns:
+    command: apps turns list
+    aliases: [ls]
+    args: [session_id]
+    example: [judt apps turns list ses_...]
+  get_turn:
+    command: apps turns get
+    args: [session_id, turn_id]
+    example: [judt apps turns get ses_... trn_...]
+  cancel_turn:
+    command: apps turns cancel
+    args: [session_id, turn_id]
+    example: [judt apps turns cancel ses_... trn_...]
+  decline_input:
+    command: apps turns decline
+    args: [session_id, turn_id]
+    example: [judt apps turns decline ses_... trn_... --message "Skip the Stripe key for now"]
+
+  # Other
+  list_templates:
+    command: templates list
+    aliases: [ls]
+    example: [judt templates list]
+  list_models:
+    command: models list
+    aliases: [ls]
+    example: [judt models list]
+  send_feedback:
+    command: feedback send
+    args: [message]
+    example: [judt feedback send "Deploys hang at starting" --type bug]

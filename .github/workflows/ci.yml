@@ -1,0 +1,25 @@
+name: ci
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+      # Fails when an API operation has no command in commands.yaml, an entry names
+      # an operation that's gone, or operations_gen.go is out of date.
+      - run: go run ./internal/gen -check
+      - run: test -z "$(gofmt -l .)" || (gofmt -l . && exit 1)
+      - run: go vet ./...
+      - run: go test ./...
+      - run: go build -o /tmp/judt ./cmd/judt && /tmp/judt --help >/dev/null
+      - run: sh -n install.sh && sh -n npm/publish.sh
