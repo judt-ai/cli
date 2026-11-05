@@ -27,3 +27,26 @@ jobs:
       # variable as part of its name, and set -u then stops the script.
       - run: |
           perl -ne 'if (/[^\x00-\x7F]/) { print "$ARGV:$.: $_"; $bad = 1 } close ARGV if eof; END { exit($bad ? 1 : 0) }' install.sh npm/publish.sh
+
+  # Runs this commit's install.sh against the latest release, in each system's own /bin/sh and a
+  # UTF-8 locale: installing twice leaves one PATH line, and a new shell finds judt.
+  install:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - env:
+          LC_ALL: en_US.UTF-8
+          SHELL: /bin/bash
+        run: |
+          export HOME="$(mktemp -d)"
+          /bin/sh install.sh
+          /bin/sh install.sh
+          case "$(uname -s)" in
+            Darwin) rc="$HOME/.bash_profile" ;;
+            *) rc="$HOME/.bashrc" ;;
+          esac
+          test "$(grep -c '.judt/bin' "$rc")" = 1
+          /bin/sh -c '. "$1" && judt version' sh "$rc"

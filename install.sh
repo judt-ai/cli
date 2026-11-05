@@ -3,6 +3,7 @@
 #
 #   JUDT_VERSION=1.2.3   install that version instead of the latest
 #   JUDT_INSTALL=/path   install to /path/bin instead of ~/.judt/bin
+#   JUDT_NO_MODIFY_PATH=1   don't add that folder to PATH in your shell's startup file
 set -eu
 
 repo="judt-ai/cli"
@@ -49,13 +50,45 @@ mv "$tmp/judt" "$dir/judt"
 chmod 755 "$dir/judt"
 
 echo "Installed $("$dir/judt" version) to $dir/judt"
+
+# The folder as it's written in a startup file, so the line still works if the file is shared.
+case "$dir" in
+  "$HOME"/*) shown="\$HOME/${dir#"$HOME"/}" ;;
+  *) shown="$dir" ;;
+esac
+line="export PATH=\"$shown:\$PATH\""
+case "${SHELL:-}" in
+  */zsh) rc="${ZDOTDIR:-$HOME}/.zshrc" ;;
+  */bash)
+    # Terminal on macOS opens login shells, which read .bash_profile and not .bashrc.
+    if [ "$os" = darwin ]; then rc="$HOME/.bash_profile"; else rc="$HOME/.bashrc"; fi
+    ;;
+  */fish)
+    rc="${XDG_CONFIG_HOME:-$HOME/.config}/fish/conf.d/judt.fish"
+    line="fish_add_path \"$shown\""
+    ;;
+  *) rc="$HOME/.profile" ;;
+esac
+
+# Adds the line unless the file already has this folder. Fails if the file can't be written.
+add_to_path() {
+  if [ -f "$rc" ] && grep -qF -e "$shown" -e "$dir" "$rc"; then return 0; fi
+  { mkdir -p "$(dirname "$rc")" && printf '\n# Judt CLI\n%s\n' "$line" >>"$rc"; } 2>/dev/null
+}
+
+echo
 case ":$PATH:" in
-  *":$dir:"*) ;;
+  *":$dir:"*)
+    echo "Next: judt auth login"
+    ;;
   *)
+    if [ -z "${JUDT_NO_MODIFY_PATH:-}" ] && add_to_path; then
+      echo "Added judt to your PATH in $rc. Open a new terminal, or run this in this one:"
+    else
+      echo "Add judt to your PATH by adding this line to $rc, and run it in this terminal:"
+    fi
+    echo "  $line"
     echo
-    echo "Add it to your PATH, for example in ~/.zshrc or ~/.bashrc:"
-    echo "  export PATH=\"$dir:\$PATH\""
+    echo "Then: judt auth login"
     ;;
 esac
-echo
-echo "Next: judt auth login"

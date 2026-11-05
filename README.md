@@ -20,6 +20,10 @@ npx judt apps deploy
 Every path installs the same single binary. `judt upgrade` prints the command that
 updates yours.
 
+The script adds `~/.judt/bin` to `PATH` in your shell's startup file, such as
+`~/.zshrc`. Open a new terminal, or run the command it prints, to use `judt` in the
+current one. Set `JUDT_NO_MODIFY_PATH=1` to leave the file alone.
+
 ## Sign in
 
 ```bash
