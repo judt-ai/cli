@@ -1,5 +1,6 @@
 # Push a tag vX.Y.Z to release: GitHub release with archives, checksums and
-# install.sh; the Homebrew cask; and the npm packages.
+# install.sh, then the npm packages. Until the NPM_TOKEN secret is set, a release
+# skips npm; the first release after it's set is the first on npm.
 name: release
 on:
   push:
@@ -25,11 +26,12 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
       - uses: actions/setup-node@v4
         with:
           node-version: 22
           registry-url: https://registry.npmjs.org
-      - run: sh npm/publish.sh "${GITHUB_REF_NAME}"
-        env:
+      - env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          if [ -z "$NODE_AUTH_TOKEN" ]; then echo "::notice::NPM_TOKEN isn't set, so this release isn't on npm."; exit 0; fi
+          sh npm/publish.sh "${GITHUB_REF_NAME}"

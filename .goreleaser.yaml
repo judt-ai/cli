@@ -1,6 +1,6 @@
-# Builds every platform's binary, the archives install.sh and Homebrew download,
-# checksums.txt, and the Homebrew cask in judt-ai/homebrew-tap. The npm packages
-# are published from dist/ afterwards by npm/publish.sh (.github/workflows/release.yml).
+# Builds every platform's binary, the archives install.sh downloads, and
+# checksums.txt. The npm packages are published from dist/ afterwards by
+# npm/publish.sh (.github/workflows/release.yml).
 version: 2
 project_name: judt
 
@@ -39,19 +39,3 @@ changelog:
   use: github
   filters:
     exclude: ["^docs:", "^test:", "^chore:"]
-
-homebrew_casks:
-  - name: judt
-    repository:
-      owner: judt-ai
-      name: homebrew-tap
-      token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"
-    homepage: https://judt.ai
-    description: Manage Judt Apps from the command line
-    hooks:
-      post:
-        # The binary isn't notarized; brew's download sets the quarantine flag.
-        install: |
-          if OS.mac?
-            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/judt"]
-          end

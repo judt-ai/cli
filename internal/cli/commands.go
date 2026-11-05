@@ -360,7 +360,7 @@ A change (POST, PUT, PATCH, DELETE) gets an Idempotency-Key. If it fails with 50
 	upgrade := &cobra.Command{
 		Use:   "upgrade",
 		Short: "Show how to update the CLI to the latest version",
-		Long:  wrap("Prints the command that updates this copy of judt, for the way it was installed: npm, Homebrew, or the install script.", 80),
+		Long:  wrap("Prints the command that updates this copy of judt, for the way it was installed: npm or the install script.", 80),
 		Args:  noArgs,
 		Run: func(*cobra.Command, []string) {
 			fmt.Fprintln(s.out, upgradeCommand())
@@ -372,11 +372,8 @@ A change (POST, PUT, PATCH, DELETE) gets an Idempotency-Key. If it fails with 50
 func upgradeCommand() string {
 	exe, _ := os.Executable()
 	exe, _ = filepath.EvalSymlinks(exe)
-	switch {
-	case strings.Contains(exe, "node_modules"):
+	if strings.Contains(exe, "node_modules") {
 		return "npm install -g judt@latest   (npx judt always runs the latest version)"
-	case strings.Contains(exe, "/Cellar/") || strings.Contains(exe, "/Caskroom/") || strings.Contains(exe, "/homebrew/"):
-		return "brew upgrade judt"
 	}
 	return "curl -fsSL https://judt.ai/install | sh"
 }

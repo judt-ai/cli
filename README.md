@@ -15,7 +15,6 @@ npx judt apps deploy
 |---|---|
 | npm (any OS) | `npm install -g judt`, or run it with `npx judt` |
 | Script (macOS, Linux) | `curl -fsSL https://judt.ai/install \| sh` |
-| Homebrew | `brew install judt-ai/tap/judt` |
 | Go | `go install github.com/judt-ai/cli/cmd/judt@latest` |
 
 Every path installs the same single binary. `judt upgrade` prints the command that
@@ -75,9 +74,9 @@ When the API adds an operation, `spec-sync` opens a pull request and CI fails un
 `commands.yaml` names it: add one entry with its `command`, `section` and an
 `example`. Changed parameters and descriptions need nothing.
 
-Release: push a tag `vX.Y.Z`. `release.yml` runs GoReleaser (archives,
-checksums, Homebrew cask) and `npm/publish.sh` (the `judt` package and one
-`@judt/cli-<platform>-<arch>` package per binary). It needs the `NPM_TOKEN` and
-`HOMEBREW_TAP_TOKEN` secrets.
+Release: push a tag `vX.Y.Z`. `release.yml` runs GoReleaser (archives and
+checksums) and `npm/publish.sh` (the `judt` package and one
+`@judt/cli-<platform>-<arch>` package per binary). npm needs the `NPM_TOKEN`
+secret; without it, the release skips npm.
 
 The design is in Core's `docs/cli-proposal.md`.
