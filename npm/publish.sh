@@ -28,11 +28,13 @@ EOF
   name="cli-$platform-$cpu"
   mkdir -p "$out/$name/bin"
   cp "$bin" "$out/$name/bin/$exe"
+  cp "$root/LICENSE" "$out/$name/LICENSE"
   cat >"$out/$name/package.json" <<JSON
 {
   "name": "@judt/$name",
   "version": "$version",
   "description": "The judt binary for $platform-$cpu. Install judt instead.",
+  "license": "MIT",
   "repository": { "type": "git", "url": "git+https://github.com/judt-ai/cli.git" },
   "os": ["$platform"],
   "cpu": ["$cpu"],
@@ -44,6 +46,7 @@ done
 
 cp -R "$root/npm/judt" "$out/judt"
 cp "$root/README.md" "$out/judt/README.md"
+cp "$root/LICENSE" "$out/judt/LICENSE"
 node -e '
   const fs = require("node:fs");
   const file = process.argv[1], version = process.argv[2];

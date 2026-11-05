@@ -2,6 +2,7 @@
   "name": "judt",
   "version": "0.0.0",
   "description": "Manage Judt Apps from the command line",
+  "license": "MIT",
   "homepage": "https://judt.ai",
   "repository": { "type": "git", "url": "git+https://github.com/judt-ai/cli.git" },
   "bin": { "judt": "bin/judt.js" },
