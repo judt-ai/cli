@@ -2,6 +2,10 @@
 # sends `api-changed`, it downloads the published OpenAPI document and regenerates
 # the commands. If anything changed it opens (or updates) one pull request. A new
 # operation shows up there as a failing `gen -check` until commands.yaml names it.
+#
+# The pull request is opened with SPEC_SYNC_TOKEN, a fine-grained token with Contents and
+# Pull requests read and write on judt-ai/cli only. The organization doesn't let GITHUB_TOKEN
+# open pull requests, and a pull request it opened wouldn't run ci.
 name: spec-sync
 on:
   schedule:
@@ -36,6 +40,7 @@ jobs:
           rm gen.log
       - uses: peter-evans/create-pull-request@v7
         with:
+          token: ${{ secrets.SPEC_SYNC_TOKEN }}
           branch: spec-sync
           title: Sync with the API's OpenAPI document
           commit-message: Sync with the API's OpenAPI document
