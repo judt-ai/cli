@@ -23,3 +23,7 @@ jobs:
       - run: go test ./...
       - run: go build -o /tmp/judt ./cmd/judt && /tmp/judt --help >/dev/null
       - run: sh -n install.sh && sh -n npm/publish.sh
+      # macOS's /bin/sh (bash 3.2) in a UTF-8 locale reads a non-ASCII byte right after a
+      # variable as part of its name, and set -u then stops the script.
+      - run: |
+          perl -ne 'if (/[^\x00-\x7F]/) { print "$ARGV:$.: $_"; $bad = 1 } close ARGV if eof; END { exit($bad ? 1 : 0) }' install.sh npm/publish.sh

@@ -30,7 +30,7 @@ archive="judt_${os}_${arch}.tar.gz"
 
 tmp="$(mktemp -d)"
 trap 'rm -rf "$tmp"' EXIT
-echo "Downloading $archive…"
+echo "Downloading $archive..."
 curl -fsSL "$base/$archive" -o "$tmp/$archive" || fail "couldn't download $base/$archive"
 curl -fsSL "$base/checksums.txt" -o "$tmp/checksums.txt" || fail "couldn't download checksums.txt"
 
