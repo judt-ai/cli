@@ -151,6 +151,14 @@ groups:
     long: |
       Create a short-lived token that opens the published App when it's password
       protected or private.
+  apps deep-links:
+    section: settings
+    aliases: [deep-link]
+    short: Create a link that opens a page of the App in the Judt dashboard
+    long: |
+      Create a link for a person to open a page of the App in the Judt dashboard, such
+      as the page that asks them for Secrets. The link grants no access: the person
+      signs in as usual.
   apps sessions:
     section: agent
     aliases: [session]
@@ -369,6 +377,25 @@ operations:
 
       If the App isn't published, it fails with `app_unpublished`.
     example: [judt apps visitor-tokens create]
+  create_deep_link:
+    command: apps deep-links create
+    print: url
+    help: |
+      Creates a link to a page of the App in the Judt dashboard, for a person to
+      open. The person signs in as usual and needs to be a member of the App's
+      organization. The link grants no access, and it stops working after 24 hours.
+
+      To ask a person for Secrets, use --page secrets and name each Secret with
+      --secrets. The page has a field for each, and the values never reach you. To
+      see that a Secret was set, run `judt apps secrets get <name>`, which fails
+      until then. Any member can create the link, and setting a Secret needs the
+      owner or admin role.
+
+      A published App needs no deep link: its own URL signs a member in when the App
+      is private.
+    example:
+      - judt apps deep-links create --page logs
+      - judt apps deep-links create --page secrets --secrets STRIPE_KEY --reason "Takes payments at checkout."
 
   # Monitoring
   list_logs:
