@@ -45,10 +45,10 @@ func (s *state) tokenClient(baseURL, token string) *api.Client {
 	return c
 }
 
-// client calls the API as JUDT_API_TOKEN, else as the profile's sign-in. An OAuth
+// client calls the API as JUDT_API_KEY, else as the profile's sign-in. An OAuth
 // access token is renewed when it has under a minute left, or after a 401.
 func (s *state) client() (*api.Client, error) {
-	if t := os.Getenv("JUDT_API_TOKEN"); t != "" {
+	if t := os.Getenv("JUDT_API_KEY"); t != "" {
 		return s.tokenClient(s.baseURL(nil), t), nil
 	}
 	profile := s.profileName()

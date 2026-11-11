@@ -33,7 +33,7 @@ root:
     source lives and a dev server runs, and a production deployment at a public URL.
     The usual flow is: create an App, change its files, preview it, commit, deploy.
 
-    Sign in once with `judt auth login`, or set JUDT_API_TOKEN to an API token.
+    Sign in once with `judt auth login`, or set JUDT_API_KEY to an API key.
 
     Most commands act on one App. Pick it with --app, the JUDT_APP environment
     variable, or `judt apps use <app-id>`, which saves it in .judt.json in the current
@@ -69,10 +69,10 @@ groups:
                                       organization, and approve the CLI.
         judt auth login --device      Prints a code to enter at judt.ai/device on any
                                       device. Use it over SSH or where no browser opens.
-        judt auth login --with-token  Reads an API token from stdin. Create API tokens
+        judt auth login --with-token  Reads an API key from stdin. Create API keys
                                       in the dashboard.
 
-      JUDT_API_TOKEN, when set, is used instead of any saved sign-in. Use it in CI and
+      JUDT_API_KEY, when set, is used instead of any saved sign-in. Use it in CI and
       for agents.
 
       A sign-in is for one organization. To use another, sign in again with
@@ -140,10 +140,10 @@ groups:
   apps tokens:
     section: settings
     aliases: [token]
-    short: Create an API token that reaches only this App
+    short: Create an API key that reaches only this App
     long: |
-      Create a short-lived API token that can reach only one App, to give to an agent
-      or an MCP client. Only an organization-wide API token can create one.
+      Create a short-lived API key that can reach only one App, to give to an agent
+      or an MCP client. Only an organization-wide API key can create one.
   apps visitor-tokens:
     section: settings
     aliases: [visitor-token]
@@ -355,17 +355,17 @@ operations:
   create_app_token:
     command: apps tokens create
     help: |
-      Creates an API token that reaches only one App, for up to 24 hours: the
+      Creates an API key that reaches only one App, for up to 24 hours: the
       current App, or the one --app-id names. Give it to an agent or an MCP client
-      that should work on that App and nothing else. The token can't reach other
-      Apps, create Apps, or create tokens, and it never outlives the token that
+      that should work on that App and nothing else. The key can't reach other
+      Apps, create Apps, or create keys, and it never outlives the key that
       created it.
 
-      Only an organization-wide API token can create one, so sign in with
-      --with-token or set JUDT_API_TOKEN first. The answer is the only place the
-      token's value appears: store it before you continue. If the answer is lost,
+      Only an organization-wide API key can create one, so sign in with
+      --with-token or set JUDT_API_KEY first. The answer is the only place the
+      key's value appears: store it before you continue. If the answer is lost,
       run the command again with the --idempotency-key the CLI printed; you get the
-      same token with a new value, and the old value stops working.
+      same key with a new value, and the old value stops working.
     example: [judt apps tokens create --name "Deploy bot" --expires-in 3600]
   create_visitor_token:
     command: apps visitor-tokens create

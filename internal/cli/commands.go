@@ -31,13 +31,13 @@ With no flags, it opens your browser: sign in, pick the organization, and approv
 
 --device prints a code to enter at the device page on any phone or computer.
 
---with-token reads an API token from stdin, or asks for it without showing it. Create API tokens in the dashboard. JUDT_API_TOKEN, when set, is used instead of any saved sign-in.
+--with-token reads an API key from stdin, or asks for it without showing it. Create API keys in the dashboard. JUDT_API_KEY, when set, is used instead of any saved sign-in.
 
 To sign in to another organization, add --profile <name>.`, 80),
 		Example: examples([]string{
 			"judt auth login",
 			"judt auth login --device",
-			"echo \"$TOKEN\" | judt auth login --with-token",
+			"echo \"$API_KEY\" | judt auth login --with-token",
 			"judt auth login --profile work",
 		}),
 		Args: noArgs,
@@ -49,13 +49,13 @@ To sign in to another organization, add --profile <name>.`, 80),
 		},
 	}
 	login.Flags().BoolVar(&device, "device", false, "Sign in with a code entered on another device, instead of opening a browser here.")
-	login.Flags().BoolVar(&withToken, "with-token", false, "Read an API token from stdin, instead of signing in with a browser.")
+	login.Flags().BoolVar(&withToken, "with-token", false, "Read an API key from stdin, instead of signing in with a browser.")
 	login.MarkFlagsMutuallyExclusive("device", "with-token")
 
 	logout := &cobra.Command{
 		Use:     "logout",
 		Short:   "Sign out, and forget the saved sign-in",
-		Long:    wrap("Revokes the profile's OAuth sign-in on the server and deletes it from this computer. An API token saved with --with-token is only forgotten here; revoke it in the dashboard.", 80),
+		Long:    wrap("Revokes the profile's OAuth sign-in on the server and deletes it from this computer. An API key saved with --with-token is only forgotten here; revoke it in the dashboard.", 80),
 		Example: examples([]string{"judt auth logout", "judt auth logout --profile work"}),
 		Args:    noArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
@@ -77,8 +77,8 @@ To sign in to another organization, add --profile <name>.`, 80),
 				return err
 			}
 			fmt.Fprintf(s.errOut, "Signed out of profile %s.\n", profile)
-			if os.Getenv("JUDT_API_TOKEN") != "" {
-				fmt.Fprintln(s.errOut, "JUDT_API_TOKEN is still set, so commands still use it.")
+			if os.Getenv("JUDT_API_KEY") != "" {
+				fmt.Fprintln(s.errOut, "JUDT_API_KEY is still set, so commands still use it.")
 			}
 			return nil
 		},
@@ -89,7 +89,7 @@ To sign in to another organization, add --profile <name>.`, 80),
 func (s *state) loginWithToken(ctx context.Context) error {
 	var token string
 	if s.stdinTTY {
-		fmt.Fprint(s.errOut, "API token (input is hidden): ")
+		fmt.Fprint(s.errOut, "API key (input is hidden): ")
 		data, err := term.ReadPassword(int(s.in.Fd()))
 		fmt.Fprintln(s.errOut)
 		if err != nil {
@@ -105,7 +105,7 @@ func (s *state) loginWithToken(ctx context.Context) error {
 	}
 	token = strings.TrimSpace(token)
 	if token == "" {
-		return usageError{fmt.Errorf("no token given: pipe an API token to judt auth login --with-token")}
+		return usageError{fmt.Errorf("no key given: pipe an API key to judt auth login --with-token")}
 	}
 	cred := &config.Credential{Type: "api_token", APIURL: s.baseURL(nil), Token: token}
 	return s.finishLogin(ctx, cred, s.tokenClient(cred.APIURL, token))

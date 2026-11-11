@@ -65,7 +65,7 @@ func Discover(ctx context.Context, client *http.Client, apiURL string) (*Server,
 		return nil, fmt.Errorf("reading %s's sign-in metadata: %w", issuer, err)
 	}
 	if !strings.HasPrefix(issuer, "https://") {
-		return nil, fmt.Errorf("%s isn't served over HTTPS, so it can't fetch the CLI's client document; sign in with an API token instead (judt auth login --with-token)", issuer)
+		return nil, fmt.Errorf("%s isn't served over HTTPS, so it can't fetch the CLI's client document; sign in with an API key instead (judt auth login --with-token)", issuer)
 	}
 	s.ClientID = issuer + "/cli/client.json"
 	s.Resource = resource.Resource

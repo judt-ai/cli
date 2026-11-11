@@ -191,7 +191,7 @@ type exitError struct {
 
 func (e exitError) Error() string { return e.msg }
 
-var errNotSignedIn = exitError{4, "Not signed in. Run judt auth login, or set JUDT_API_TOKEN to an API token."}
+var errNotSignedIn = exitError{4, "Not signed in. Run judt auth login, or set JUDT_API_KEY to an API key."}
 
 func (s *state) report(cmd *cobra.Command, err error) int {
 	var ee exitError
@@ -218,7 +218,7 @@ func (s *state) report(cmd *cobra.Command, err error) int {
 			fmt.Fprintf(s.errOut, "Request ID: %s\n", ae.RequestID)
 		}
 		if ae.Status == 401 || ae.Code == "insufficient_scope" {
-			fmt.Fprintln(s.errOut, "Sign in again with judt auth login, or check JUDT_API_TOKEN.")
+			fmt.Fprintln(s.errOut, "Sign in again with judt auth login, or check JUDT_API_KEY.")
 			return 4
 		}
 		return 1

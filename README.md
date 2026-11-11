@@ -29,8 +29,8 @@ current one. Set `JUDT_NO_MODIFY_PATH=1` to leave the file alone.
 ```bash
 judt auth login                         # opens your browser
 judt auth login --device                # a code to enter on another device
-echo "$TOKEN" | judt auth login --with-token
-export JUDT_API_TOKEN=judt_...          # CI and agents; wins over any sign-in
+echo "$API_KEY" | judt auth login --with-token
+export JUDT_API_KEY=judt_...            # CI and agents; wins over any sign-in
 judt whoami
 ```
 
@@ -54,7 +54,7 @@ judt api GET /api/apps                  # anything else
 
 | Environment | |
 |---|---|
-| `JUDT_API_TOKEN` | API token to use instead of the saved sign-in |
+| `JUDT_API_KEY` | API key to use instead of the saved sign-in |
 | `JUDT_APP` | The App to act on |
 | `JUDT_PROFILE` | The saved sign-in to use (`--profile`) |
 | `JUDT_API_URL` | Another API, such as staging |

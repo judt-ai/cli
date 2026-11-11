@@ -23,7 +23,7 @@ type Credential struct {
 	// Type is "api_token" or "oauth".
 	Type   string `json:"type"`
 	APIURL string `json:"api_url"`
-	// Token is an API token (Type api_token).
+	// Token is an API key (Type api_token).
 	Token string `json:"token,omitempty"`
 	// OAuth (Type oauth).
 	AccessToken        string    `json:"access_token,omitempty"`

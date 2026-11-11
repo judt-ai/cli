@@ -18,7 +18,7 @@ func run(t *testing.T, api http.HandlerFunc, args ...string) (string, string, in
 	server := httptest.NewServer(api)
 	t.Cleanup(server.Close)
 	t.Setenv("JUDT_API_URL", server.URL)
-	t.Setenv("JUDT_API_TOKEN", "judt_test")
+	t.Setenv("JUDT_API_KEY", "judt_test")
 	t.Setenv("JUDT_NO_UPDATE_CHECK", "1")
 	t.Setenv("JUDT_CONFIG_DIR", t.TempDir())
 	var out, errOut bytes.Buffer
