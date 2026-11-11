@@ -373,7 +373,7 @@ func upgradeCommand() string {
 	exe, _ := os.Executable()
 	exe, _ = filepath.EvalSymlinks(exe)
 	if strings.Contains(exe, "node_modules") {
-		return "npm install -g judt@latest   (npx judt always runs the latest version)"
+		return "npm install -g @judt/cli@latest   (npx @judt/cli always runs the latest version)"
 	}
 	return "curl -fsSL https://judt.ai/install | sh"
 }

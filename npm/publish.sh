@@ -1,6 +1,6 @@
 #!/bin/sh
 # Publishes the npm packages from GoReleaser's dist/: one @judt/cli-<platform>-<arch>
-# package per binary, then `judt`, which depends on all of them at the same version.
+# package per binary, then @judt/cli, which depends on all of them at the same version.
 #
 #   npm/publish.sh 1.2.3            publish (needs NPM_TOKEN in ~/.npmrc or the env)
 #   npm/publish.sh 1.2.3 --dry-run  build the packages and show what would publish
@@ -33,7 +33,7 @@ EOF
 {
   "name": "@judt/$name",
   "version": "$version",
-  "description": "The judt binary for $platform-$cpu. Install judt instead.",
+  "description": "The judt binary for $platform-$cpu. Install @judt/cli instead.",
   "license": "MIT",
   "repository": { "type": "git", "url": "git+https://github.com/judt-ai/cli.git" },
   "os": ["$platform"],

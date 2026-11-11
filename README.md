@@ -4,16 +4,16 @@ The Judt CLI. It manages [Judt](https://judt.ai) Apps from the command line: cre
 them, change their source, preview, commit, deploy, set Secrets, and read logs.
 
 ```bash
-npx judt auth login
-npx judt apps create --name "Acme hiring"
-npx judt apps deploy
+npx @judt/cli auth login
+npx @judt/cli apps create --name "Acme hiring"
+npx @judt/cli apps deploy
 ```
 
 ## Install
 
 | How | Command |
 |---|---|
-| npm (any OS) | `npm install -g judt`, or run it with `npx judt` |
+| npm (any OS) | `npm install -g @judt/cli`, or run it with `npx @judt/cli` |
 | Script (macOS, Linux) | `curl -fsSL https://judt.ai/install \| sh` |
 | Go | `go install github.com/judt-ai/cli/cmd/judt@latest` |
 
@@ -79,7 +79,7 @@ When the API adds an operation, `spec-sync` opens a pull request and CI fails un
 `example`. Changed parameters and descriptions need nothing.
 
 Release: push a tag `vX.Y.Z`. `release.yml` runs GoReleaser (archives and
-checksums) and `npm/publish.sh` (the `judt` package and one
+checksums) and `npm/publish.sh` (the `@judt/cli` package and one
 `@judt/cli-<platform>-<arch>` package per binary). npm needs the `NPM_TOKEN`
 secret; without it, the release skips npm.
 

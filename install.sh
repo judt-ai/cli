@@ -14,7 +14,7 @@ fail() { echo "judt install: $*" >&2; exit 1; }
 case "$(uname -s)" in
   Darwin) os=darwin ;;
   Linux) os=linux ;;
-  *) fail "$(uname -s) isn't supported here. On Windows, run: npm install -g judt" ;;
+  *) fail "$(uname -s) isn't supported here. On Windows, run: npm install -g @judt/cli" ;;
 esac
 case "$(uname -m)" in
   x86_64 | amd64) arch=amd64 ;;

@@ -1,5 +1,5 @@
 {
-  "name": "judt",
+  "name": "@judt/cli",
   "version": "0.0.0",
   "description": "Manage Judt Apps from the command line",
   "license": "MIT",
