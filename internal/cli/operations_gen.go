@@ -227,7 +227,7 @@ var operations = []Operation{
 		Query: nil,
 		Body: []Param{
 			{Name: "content", Parent: "", Type: "string", Enum: nil, Required: true,
-				Description: "The file's UTF-8 text, up to 1 MiB."},
+				Description: "The file's UTF-8 text, up to 4 MiB."},
 		},
 	},
 	{
